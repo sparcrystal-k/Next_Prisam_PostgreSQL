@@ -180,7 +180,7 @@ export default function RequestsSection({
                       });
                     }}
                   >
-                    Cancel Request
+                    Cancel Offer
                   </Button>
                 )}
               </div>

@@ -23,6 +23,9 @@ export default function PaymentOfRequestSection({
     // Create a Checkout Session
     return fetch("/api/stripe/checkout_sessions", {
       method: "POST",
+      body: JSON.stringify({
+        product: "Booking Now",
+      }),
     })
       .then((res) => res.json())
       .then((data) => data.clientSecret)
