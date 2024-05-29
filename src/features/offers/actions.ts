@@ -34,23 +34,17 @@ export const acceptOffer = async (offer: Offer) => {
     where: { id: offer.id },
   });
 
+  const currentProperty = await prisma.property.findFirst({
+    where: { id: offer.property_id },
+  });
+
   const profile = await getCurrentProfile();
 
   if (previousOffer.status === "cancelled") {
-    // await prisma.notifications.create({
-    //   data: {
-    //     from: profile?.id,
-    //     to: offer.property.owner_id,
-    //     collection: "requests",
-    //     type: "accepted",
-    //     title: "Request accepted",
-    //     message: `Your offer for ${offer.request.category.title} request has been accepted.`,
-    //     data: offer,
-    //     link: "",
-    //     viewed: false,
-    //   },
-    // });
     throw new Error("Offer is cancelled.");
+  }
+  if (currentProperty.status === "booking") {
+    throw new Error("Property is booking now.");
   }
   const updatedOffer = await prisma.offers.update({
     where: {
@@ -107,7 +101,7 @@ export const acceptOffer = async (offer: Offer) => {
     },
   });
 
-  return updatedOffer;
+  return { success: true, offer: updatedOffer };
 };
 
 export const declineOffer = async (offer: Offer) => {

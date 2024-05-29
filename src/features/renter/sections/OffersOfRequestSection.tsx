@@ -8,15 +8,13 @@ import {
   NavigationIcon,
 } from "lucide-react";
 import dayjs from "@/lib/utils/dayjs";
-import { useDeclineOffer, useOffersOfRequest } from "../hooks";
+import { useDeclineOffer, useOffersOfRequest, useAcceptOffer } from "../hooks";
 import { getHumanizedDate } from "@/lib/client";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/confirm";
-import { acceptOffer, declineOffer } from "@/features/offers/actions";
 import { toast } from "sonner";
 import { RentalRequest } from "@/features/requests/schema";
 import { useRouter } from "next/navigation";
-import { acceptedRequest } from "../actions";
 import ProfileDialog from "@/features/requests/components/ProfileDialog";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,10 +28,14 @@ interface IOffersOfRequestSectionProps {
 export default function OffersOfRequestSection({
   request,
 }: IOffersOfRequestSectionProps) {
-  const { data: offers, isLoading } = useOffersOfRequest(request?.id);
+  const [isLoading, setLoading] = useState(false);
+  const { data: offers, isLoading: isOffersLoading } = useOffersOfRequest(
+    request?.id,
+  );
   const confirm = useConfirm();
 
   const router = useRouter();
+  const acceptOffer = useAcceptOffer();
   const declineOffer = useDeclineOffer();
 
   const [open, setOpen] = useState(false);
@@ -42,13 +44,19 @@ export default function OffersOfRequestSection({
   const [create_at, setCreateAt] = useState<string>("");
 
   const handleAcceptOffer = async (offer: Offer) => {
-    await acceptOffer(offer)
+    setLoading(true);
+    await acceptOffer
+      .mutateAsync(offer)
       .then((res) => {
-        toast.success("Offer Booking");
-        router.push(`/renter/requests/${request.id}/payment`);
+        if (res.success) {
+          router.push(`/renter/requests/${request.id}/payment`);
+        }
       })
       .catch((error) => {
-        toast.error(error);
+        console.log(error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -215,6 +223,7 @@ export default function OffersOfRequestSection({
                               handleAcceptOffer(offer);
                             });
                           }}
+                          loading={isLoading}
                         >
                           Accept Offer
                         </Button>

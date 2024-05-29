@@ -24,7 +24,7 @@ export default function PaymentOfSbuscribeSection() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        product: "Subscribe One ",
+        product: "Pay Now",
       }),
     })
       .then((res) => res.json())
